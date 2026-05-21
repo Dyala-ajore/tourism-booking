@@ -3,7 +3,6 @@ name: Deploy Tourism Booking to ECS
 on:
   push:
     branches: [ "main" ]
-
   workflow_dispatch:
 
 env:
