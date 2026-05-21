@@ -1,0 +1,85 @@
+name: Deploy Tourism Booking to ECS
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: tourism-booking
+  ECS_CLUSTER: tourism-booking-cluster
+  ECS_SERVICE: tourism-booking-service
+  ECS_TASK_DEFINITION: task-definition.json
+  CONTAINER_NAME: tourism-booking-container
+  ALB_URL: ${{ secrets.ALB_URL }}
+
+jobs:
+  deploy:
+    name: Test, Build, Push, Deploy
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Run unit tests
+        run: mvn test
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push Docker image
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build -t $IMAGE_URI .
+          docker push $IMAGE_URI
+          docker tag $IMAGE_URI $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "image=$IMAGE_URI" >> $GITHUB_OUTPUT
+
+      - name: Render ECS task definition with new image
+        id: render-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+      - name: Smoke test ALB health endpoint
+        run: |
+          STATUS_CODE=$(curl -s -o response.txt -w "%{http_code}" "$ALB_URL/actuator/health")
+          cat response.txt
+          if [ "$STATUS_CODE" != "200" ]; then
+            echo "Smoke test failed. Expected HTTP 200 but got $STATUS_CODE"
+            exit 1
+          fi
