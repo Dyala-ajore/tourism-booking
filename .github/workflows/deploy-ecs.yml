@@ -9,10 +9,10 @@ on:
 env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: tourism-booking
-  ECS_CLUSTER: tourism-booking-cluster
-  ECS_SERVICE: tourism-booking-service
+  ECS_CLUSTER: tourism-cluster-1
+  ECS_SERVICE: tourism-service
   ECS_TASK_DEFINITION: task-definition.json
-  CONTAINER_NAME: tourism-booking-container
+  CONTAINER_NAME: tourism-container
   ALB_URL: ${{ secrets.ALB_URL }}
 
 jobs:
