@@ -10,7 +10,7 @@
   "taskRoleArn": "arn:aws:iam::768781133395:role/LabRole",
   "containerDefinitions": [
     {
-      "name": "tourism-booking-container",
+      "name": "tourism-container",
       "image": "768781133395.dkr.ecr.us-east-1.amazonaws.com/tourism-booking:latest",
       "essential": true,
       "portMappings": [
