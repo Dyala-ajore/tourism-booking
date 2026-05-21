@@ -24,24 +24,22 @@
         {
           "name": "PORT",
           "value": "8080"
-        }
-      ],
-      "secrets": [
+        },
         {
           "name": "DB_URL",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:768781133395:secret:tourism-booking/DB_URL"
+          "value": "jdbc:mysql://database-1.ct64jbecah2e.us-east-1.rds.amazonaws.com:3306/tourism_booking?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
         },
         {
           "name": "DB_USERNAME",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:768781133395:secret:tourism-booking/DB_USERNAME"
+          "value": "admin"
         },
         {
           "name": "DB_PASSWORD",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:768781133395:secret:tourism-booking/DB_PASSWORD"
+          "value": "AwsRds#Booking123"
         },
         {
           "name": "JWT_SECRET",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:768781133395:secret:tourism-booking/JWT_SECRET"
+          "value": "MySecretKeyForJWTTokenGenerationInTourismBookingSystemPleaseChangeInProduction12345"
         }
       ],
       "logConfiguration": {
