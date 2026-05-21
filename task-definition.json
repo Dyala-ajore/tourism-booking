@@ -1,10 +1,13 @@
 {
-  "family": "tourism-booking-task",
+  "family": "tourism-task",
   "networkMode": "awsvpc",
-  "requiresCompatibilities": ["FARGATE"],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
   "cpu": "512",
   "memory": "1024",
-  "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/ecsTaskExecutionRole",
+  "executionRoleArn": "arn:aws:iam::768781133395:role/LabRole",
+  "taskRoleArn": "arn:aws:iam::768781133395:role/LabRole",
   "containerDefinitions": [
     {
       "name": "tourism-booking-container",
